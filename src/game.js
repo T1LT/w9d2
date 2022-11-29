@@ -1,5 +1,6 @@
 const Asteroid = require("./asteroid.js");
 const Ship = require("./ship.js");
+const Bullet = require("./bullet.js");
 
 function Game(canvas) {
   this.DIM_X = canvas.width;
@@ -7,6 +8,7 @@ function Game(canvas) {
   this.ctx = canvas.getContext("2d");
   this.NUM_ASTEROIDS = 8;
   this.asteroids = [];
+  this.bullets = [];
   this.addAsteroids();
   this.ship = new Ship({ pos: this.randomPosition(), game: this });
 }
@@ -71,7 +73,11 @@ Game.prototype.checkCollisions = function () {
 };
 
 Game.prototype.remove = function (object) {
-  this.asteroids.splice(this.asteroids.indexOf(object), 1);
+  if (object instanceof Asteroid) {
+    this.asteroids.splice(this.asteroids.indexOf(object), 1);
+  } else if (object instanceof Bullet) {
+    this.bullets.splice(this.bullets.indexOf(object), 1);
+  }
 };
 
 Game.prototype.step = function () {
@@ -80,7 +86,11 @@ Game.prototype.step = function () {
 };
 
 Game.prototype.allObjects = function () {
-  return [...this.asteroids, this.ship];
+  return [...this.asteroids, ...this.bullets, this.ship];
 };
+
+Game.prototype.addBullet = function(bullet) {
+  this.bullets.push(bullet);
+}
 
 module.exports = Game;

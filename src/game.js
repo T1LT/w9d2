@@ -1,4 +1,5 @@
 const Asteroid = require("./asteroid.js");
+const Ship = require("./ship.js");
 
 function Game(canvas) {
   this.DIM_X = canvas.width;
@@ -7,6 +8,7 @@ function Game(canvas) {
   this.NUM_ASTEROIDS = 8;
   this.asteroids = [];
   this.addAsteroids();
+  this.ship = new Ship({ pos: this.randomPosition(), game: this });
 }
 
 Game.prototype.addAsteroids = function () {
@@ -22,22 +24,22 @@ Game.prototype.randomPosition = function () {
 
 Game.prototype.draw = function (ctx) {
   ctx.clearRect(0, 0, this.DIM_X, this.DIM_Y);
-  this.asteroids.forEach((el) => {
+  this.allObjects().forEach((el) => {
     el.draw(ctx);
   });
 };
 
 Game.prototype.moveObjects = function () {
-  this.asteroids.forEach((el) => {
+  this.allObjects().forEach((el) => {
     el.move();
     el.pos = this.wrap(el.pos);
     // console.log(el.pos);
   });
 };
 
-Game.prototype.wrap = function(pos) {
+Game.prototype.wrap = function (pos) {
   // return [Math.abs(pos[0]%this.DIM_X), Math.abs(pos[1]%this.DIM_Y)];
-  let res = [pos[0],pos[1]];
+  let res = [pos[0], pos[1]];
   if (pos[0] < 0) {
     res[0] = this.DIM_X;
   } else if (pos[0] > this.DIM_X) {
@@ -49,28 +51,36 @@ Game.prototype.wrap = function(pos) {
     res[1] = 0;
   }
   return res;
-}
+};
 
-Game.prototype.checkCollisions = function() {
-  for (let i = 1; i < this.asteroids.length; i++) {
-    for (let j = 0; j < i; j++) {
-      if (this.asteroids[i].isCollidedWith(this.asteroids[j])) {
-        // alert("COLLISION");
-        // console.log("COLLISION");
-        this.asteroids[i].collideWith(this.asteroids[j]);
-        break;
-      }
+Game.prototype.checkCollisions = function () {
+  // for (let i = 1; i < this.allObjects().length; i++) {
+  //   for (let j = 0; j < i; j++) {
+  //     if (this.allObjects()[i].isCollidedWith(this.allObjects()[j])) {
+  //       console.log("collision");
+  //       this.allObjects()[i].collideWith(this.allObjects()[j]);
+  //       break;
+  //     }
+  //   }
+  // }
+  this.asteroids.forEach((asteroid) => {
+    if (asteroid.isCollidedWith(this.ship)) {
+      asteroid.collideWith(this.ship);
     }
-  }
-}
+  });
+};
 
-Game.prototype.remove = function(object) {
+Game.prototype.remove = function (object) {
   this.asteroids.splice(this.asteroids.indexOf(object), 1);
-}
+};
 
-Game.prototype.step = function() {
+Game.prototype.step = function () {
   this.moveObjects();
   this.checkCollisions();
-}
+};
+
+Game.prototype.allObjects = function () {
+  return [...this.asteroids, this.ship];
+};
 
 module.exports = Game;
